@@ -1,3 +1,5 @@
+<img src="docs/logo.png" width="80" alt="Re;Guide logo">
+
 # Re;Guide
 
 Re;Guide is a free desktop app that keeps you on track while you run an interview. It shows your guide one question at a time, times each section, and lets you take notes and mark moments as you talk. It runs on Mac and Windows and is still in beta.

@@ -4,7 +4,7 @@ A free app for running interviews from your guide, for Mac and Windows. Beta.
 
 ![Re;Guide](docs/interview-day.png)
 
-I built it to run the interviews for my own study.
+We built it for our own convenience during a study.
 
 - Write your guide as a plain text file.
 - See one question at a time, or the whole script.

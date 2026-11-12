@@ -1,10 +1,10 @@
 # Re;Guide
 
-A free app for running interviews from your guide, for Mac and Windows. Beta.
+Re;Guide is a free desktop app that keeps you on track while you run an interview. It shows your guide one question at a time, times each section, and lets you take notes and mark moments as you talk. It runs on Mac and Windows and is still in beta.
 
 ![Re;Guide](docs/interview-day.png)
 
-We built it for our own convenience during a study.
+We built it for our own convenience while running the interviews for a study.
 
 - Write your guide as a plain text file.
 - See one question at a time, or the whole script.

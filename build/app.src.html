@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Re;Guide</title>
+<link rel="stylesheet" href="fonts/ui.css"><link rel="stylesheet" href="fonts/noto-sans-bengali.css">
+<style>
+/* Same look as Re;Code (blue-grey ground, Day and Night), with a blue accent instead of purple.
+   Layout follows the study's interviewer guide: timer bar on top, outline left, notes right. */
+:root{
+  --bg:#f1f4f9;--frame:#e9eef6;--surface:#ffffff;--panel:#ffffff;--card:#ffffff;--sel:#ffffff;--segbg:#e4ebf5;--sub:#eef3fb;
+  --ink:#233047;--mute:#5f6d83;--faint:#8793a5;--line:#d4deeb;--hover:rgba(35,48,71,.05);
+  --acc:#2861c8;--onacc:#fff;--accs:#e3edff;--acck:#1f4fa8;
+  --good:#2f8f5b;--goods:#e3f1e7;--warn:#fbe3a4;--warnk:#5e4300;--amb:#a8650f;--bad:#b04a2e;
+  --tip:#233047;--tipk:#f1f4f9;
+  --shadow:0 14px 34px rgba(35,48,71,.14);--shadow-s:0 1px 2px rgba(35,48,71,.05),0 2px 8px rgba(35,48,71,.06);color-scheme:light;
+  --ui:"Manrope","Noto Sans Bengali",-apple-system,system-ui,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#13161c;--frame:#0f1116;--surface:#171b22;--panel:#1e232b;--card:#1e232b;--sel:#2c3240;--segbg:#222731;--sub:#222731;
+  --ink:#d6dbe2;--mute:#9aa3af;--faint:#858d9a;--line:#2c313a;--hover:rgba(214,219,226,.05);
+  --acc:#8fb6ff;--onacc:#10213f;--accs:rgba(143,182,255,.18);--acck:#c3d7ff;
+  --good:#6cc592;--goods:rgba(108,197,146,.16);--warn:rgba(205,176,122,.16);--warnk:#e2cf9f;--amb:#e0b25a;--bad:#d08b78;
+  --tip:#d6dbe2;--tipk:#14171b;--shadow:0 14px 34px rgba(0,0,0,.45);--shadow-s:0 1px 2px rgba(0,0,0,.25);color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#13161c;--frame:#0f1116;--surface:#171b22;--panel:#1e232b;--card:#1e232b;--sel:#2c3240;--segbg:#222731;--sub:#222731;
+  --ink:#d6dbe2;--mute:#9aa3af;--faint:#858d9a;--line:#2c313a;--hover:rgba(214,219,226,.05);
+  --acc:#8fb6ff;--onacc:#10213f;--accs:rgba(143,182,255,.18);--acck:#c3d7ff;
+  --good:#6cc592;--goods:rgba(108,197,146,.16);--warn:rgba(205,176,122,.16);--warnk:#e2cf9f;--amb:#e0b25a;--bad:#d08b78;
+  --tip:#d6dbe2;--tipk:#14171b;--shadow:0 14px 34px rgba(0,0,0,.45);--shadow-s:0 1px 2px rgba(0,0,0,.25);color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--frame);color:var(--ink);font:14px/1.45 var(--ui);overflow:hidden;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+textarea,input{caret-color:var(--acc)}
+.i{width:18px;height:18px;flex:none;display:block}.i.s{width:15px;height:15px}
+*::-webkit-scrollbar{width:10px;height:10px}*::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;border:2px solid transparent;background-clip:content-box}
+kbd{font:600 11.5px var(--ui);background:var(--sub);color:var(--mute);border-radius:6px;padding:1px 6px;min-width:20px;display:inline-block;text-align:center}
+[hidden]{display:none!important}
+.grow{flex:1}
+
+/* controls: one shape, as in Re;Code */
+.btn{height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 12px;border-radius:10px;background:var(--panel);font-size:13px;white-space:nowrap;box-shadow:var(--shadow-s);transition:filter .12s,background .12s}
+.btn:hover{filter:brightness(.97)}
+.btn.icon{width:36px;padding:0;justify-content:center}
+.btn.sm{height:30px;padding:0 10px;font-size:12.5px}.btn.sm.icon{width:30px;padding:0}
+.btn.acc{background:var(--acc);color:var(--onacc);box-shadow:none;font-weight:600}
+.btn.acc kbd{background:rgba(255,255,255,.22);color:inherit}
+.btn.ghost{background:transparent;box-shadow:none}.btn.ghost:hover{background:var(--hover)}
+.btn:disabled{opacity:.45;cursor:default}
+.seg{display:inline-flex;background:var(--segbg);border-radius:10px;padding:3px;gap:2px}
+.seg button{height:28px;padding:0 12px;border-radius:8px;font-size:12.5px;color:var(--mute);display:inline-flex;align-items:center;gap:6px}
+.seg button[aria-pressed=true]{background:var(--sel);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+
+/* section colours: one per section, cycling, so the outline and the heading match */
+[data-tone="0"]{--tone:#4a7fe0}[data-tone="1"]{--tone:#2a9d8f}[data-tone="2"]{--tone:#8a6ad8}
+[data-tone="3"]{--tone:#c98a1b}[data-tone="4"]{--tone:#d0607a}[data-tone="5"]{--tone:#2b9fc4}
+
+/* frame */
+.app{display:grid;grid-template-rows:auto minmax(0,1fr) 30px;height:100vh}
+
+/* top: who and what, the timer, the next step */
+.bar{display:grid;grid-template-columns:var(--lw) minmax(0,1fr) auto;align-items:center;gap:20px;padding:12px 16px 12px 14px;border-bottom:1px solid var(--line);background:var(--bg)}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.who .txt{min-width:0}
+.brand{display:flex;align-items:center;gap:2px;white-space:nowrap}
+.brand b{font:700 16px 'Bricolage Grotesque',var(--ui);letter-spacing:-.02em}.brand b span{margin:0 .12em}.brand b i{font-style:normal;color:var(--acc)}
+.beta{margin-left:7px;font:700 10.5px var(--ui);letter-spacing:.04em;text-transform:uppercase;color:var(--acck);background:var(--accs);border-radius:6px;padding:2px 6px}
+.logo{width:28px;height:28px;color:var(--acc);display:grid;place-items:center;flex:none}.logo .i{width:22px;height:22px}
+.who small{display:block;color:var(--mute);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who small b{color:var(--ink);font-weight:650}
+.timer{display:flex;align-items:center;gap:22px;min-width:0}
+.sclock{flex:none;text-align:left}
+.sclock b{display:block;font:700 28px/1 var(--ui);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.sclock small{font-size:12px;color:var(--mute)}
+.track{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.track .tt{display:flex;align-items:center;gap:12px}
+.track .tt b{font-weight:650;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track .left{font:700 18px var(--ui);font-variant-numeric:tabular-nums;white-space:nowrap}.track .left.over{color:var(--amb)}
+.meter{height:5px;border-radius:9px;background:var(--segbg);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--acc);border-radius:9px;transition:width .6s}
+.meter.over i{background:var(--amb)}
+.track .td{display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.td .behind{color:var(--amb)}.td .ahead{color:var(--good)}
+.bar.idle .meter{opacity:.5}
+.bar .end{display:flex;align-items:center;gap:8px}
+
+/* three columns */
+.layout{display:grid;grid-template-columns:var(--lw) minmax(0,1fr) var(--rw);min-height:0;--lw:260px;--rw:300px;transition:grid-template-columns .22s cubic-bezier(.2,.8,.2,1)}
+.app{--lw:260px}
+.app.lshut .layout,.app.lshut{--lw:52px}.app.rshut .layout{--rw:52px}
+.rail,.side{min-height:0;overflow:auto;padding:14px 10px 18px}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:8px;height:34px;padding:0 4px 0 8px;margin-bottom:6px}
+.ph h3{margin:0;font-size:14px;font-weight:700;white-space:nowrap}
+.opener{display:none;flex-direction:column;align-items:center;gap:12px;padding-top:4px}
+.opener b{writing-mode:vertical-rl;font-size:12.5px;font-weight:600;color:var(--mute)}
+.lshut .rail>:not(.opener),.rshut .side>:not(.opener){display:none!important}
+.lshut .rail .opener,.rshut .side .opener{display:flex}
+
+.ri{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;width:100%;text-align:left;padding:9px 12px 9px 13px;border-radius:12px;margin-bottom:3px;color:var(--ink);position:relative}
+.ri:hover{background:var(--hover)}
+.ri .rt{font-weight:600;font-size:13.5px;line-height:1.35}
+.ri .rp{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:1px}
+.ri .rp .over{color:var(--amb);font-weight:700}
+.ri .rs{font-size:12px;color:var(--faint);grid-column:1}
+.ri .rb{grid-column:1/-1;display:flex;gap:6px}.ri .rb:empty{display:none}
+.ri .rb b{font-size:11px;font-weight:700;border-radius:6px;padding:1px 7px}
+.ri .rb .vw{color:var(--acck);background:var(--accs)}.ri .rb .lv{color:var(--good);background:var(--goods)}.ri .rb .pz{color:var(--warnk);background:var(--warn)}
+.ri.viewing{background:var(--card);box-shadow:var(--shadow-s)}
+.ri.viewing::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--tone)}
+.ri.viewing .rt{color:var(--acck)}
+.ri.done .rt{color:var(--mute)}
+.ri.done .rs::after{content:" · done";color:var(--good)}
+
+/* the script */
+.stage{min-width:0;min-height:0;display:flex;flex-direction:column;margin:10px 0;background:var(--surface);border-radius:14px;box-shadow:0 0 0 1px var(--line),0 1px 3px rgba(0,0,0,.04);overflow:hidden}
+.main{flex:1;min-height:0;overflow:auto;padding:22px 30px 30px;--z:1}
+.col{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.banner{display:flex;align-items:center;gap:12px;background:var(--sub);border-radius:12px;padding:10px 12px 10px 16px;font-size:13.5px}
+.banner .i{color:var(--acc)}.banner.warnb{background:var(--warn);color:var(--warnk)}.banner.warnb .i{color:var(--warnk)}
+details.warns{background:var(--warn);color:var(--warnk);border-radius:12px;padding:10px 14px;font-size:13.5px}
+details.warns summary{cursor:pointer;font-weight:600}details.warns ul{margin:8px 0 2px;padding-left:20px;line-height:1.5}
+.sh{display:flex;align-items:center;gap:10px;padding-left:16px;border-left:3px solid var(--tone)}
+.sh h2{font:700 calc(25px*var(--z))/1.2 var(--ui);letter-spacing:-.02em;margin:0}
+.sh small{color:var(--mute);font-size:13px}
+.zoom{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.zoom span{min-width:38px;text-align:center}
+.tools{display:flex;justify-content:flex-end}
+.cue{background:var(--sub);border-radius:16px;padding:20px 26px 24px;display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px}
+.cue .cl{display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--mute)}
+.cue .cl b{font-weight:700;color:var(--acck)}
+.cue .cl .at{color:var(--good);font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.spoken{margin:4px 0 0;font-size:calc(23px*var(--z));line-height:1.5;font-weight:500;white-space:pre-wrap}
+.cue.ask .spoken{font-weight:600}
+.probes{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.probes li{display:flex;gap:10px;font-size:calc(16px*var(--z));line-height:1.5;white-space:pre-wrap}
+.probes li::before{content:"Probe";font:700 11px/calc(24px*var(--z)) var(--ui);color:var(--acck);flex:none;width:40px}
+.pnote{display:flex;gap:9px;align-items:flex-start;font-size:calc(14px*var(--z));line-height:1.55;color:var(--mute);font-style:italic;white-space:pre-wrap;margin:0}
+.pnote .i{margin-top:2px;color:var(--faint)}
+.full .cue{background:transparent;padding:6px 0 18px;border-radius:0;border-bottom:1px solid var(--line)}
+.full .cue.on{background:var(--sub);border-radius:16px;padding:16px 22px 20px;border-bottom:0}
+.jumps{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
+.jumps button{text-align:left;padding:10px 12px;border-radius:10px;background:var(--sub);display:flex;flex-direction:column;gap:3px;min-width:0}
+.jumps button:hover{filter:brightness(.97)}
+.jumps button .jk{font:700 11px var(--ui);color:var(--mute)}
+.jumps button .jn{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jumps button[aria-current=true]{background:var(--acc);color:var(--onacc)}.jumps button[aria-current=true] .jk{color:inherit;opacity:.8}
+.jumps button.seen:not([aria-current=true]) .jk::after{content:" ✓";color:var(--good)}
+details.upnext summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--mute)}
+details.upnext p{margin:8px 0 0;color:var(--mute);white-space:pre-wrap}
+.cnav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;border-top:1px solid var(--line);flex:none}
+.cnav .pos{font-size:12.5px;color:var(--mute);font-variant-numeric:tabular-nums}
+.empty{max-width:520px;margin:9vh auto 0;text-align:center}
+.empty .logo{margin:0 auto 10px;width:52px;height:52px}.empty .logo .i{width:44px;height:44px}
+.empty h2{font-size:22px;margin:0 0 12px}.empty ol{text-align:left;color:var(--mute);line-height:1.6;padding-left:22px;margin:0 0 20px}
+.empty .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+/* the notes side */
+.ticks{display:flex;gap:6px;flex-wrap:wrap;margin:0 4px 14px}
+.ticks button{height:28px;display:inline-flex;align-items:center;gap:6px;padding:0 10px;border-radius:99px;font-size:12px;color:var(--mute);background:var(--segbg)}
+.ticks button.on{color:var(--good);background:var(--goods);font-weight:600}
+.ticks button:disabled{opacity:.5;cursor:default}
+.field{margin:0 4px 16px}
+.field .lb{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:650;color:var(--mute);margin-bottom:7px;min-height:30px}
+.field textarea{width:100%;min-height:96px;border:0;border-radius:10px;background:var(--panel);box-shadow:0 0 0 1px var(--line);padding:9px 11px;font-size:13.5px;line-height:1.5;resize:vertical}
+.field textarea:focus{outline:2px solid var(--acc);outline-offset:0}
+.field textarea:disabled{opacity:.55}
+.marks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.marks li{font-size:13px;line-height:1.4;display:flex;gap:8px}
+.marks time{font-weight:650;font-variant-numeric:tabular-nums;color:var(--acck);flex:none}
+.marks small{color:var(--faint)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 4px 0;padding-top:14px;border-top:1px solid var(--line)}
+.acts .btn{justify-content:flex-start}
+.acts .btn.endb{color:var(--bad)}
+
+/* footer */
+.status{display:flex;align-items:center;gap:16px;padding:0 16px;font-size:12px;color:var(--mute);border-top:1px solid var(--line);background:var(--bg);white-space:nowrap;overflow:hidden}
+.status .save{display:flex;align-items:center;gap:7px;overflow:hidden;text-overflow:ellipsis}
+.status .save i{width:7px;height:7px;border-radius:50%;background:var(--faint);flex:none}.status .save.on i{background:var(--good)}
+
+.markbox{position:fixed;left:50%;bottom:44px;transform:translateX(-50%);z-index:85;display:flex;gap:8px;background:var(--panel);padding:8px;border-radius:12px;box-shadow:var(--shadow);width:min(560px,92vw)}
+.markbox input{flex:1;border:0;border-radius:8px;background:var(--sub);padding:0 10px;height:34px;font-size:13.5px}
+.markbox input:focus{outline:2px solid var(--acc)}
+.modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.35);display:grid;place-items:center;padding:16px}
+.modal .box{background:var(--bg);border-radius:14px;padding:22px 24px;width:min(640px,100%);box-shadow:var(--shadow);max-height:90vh;overflow:auto}
+.modal h2{margin:0 0 12px;font-size:18px}.modal pre{background:var(--panel);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.6;white-space:pre-wrap;overflow:auto}
+.modal table{border-collapse:collapse;font-size:13.5px;width:100%}.modal td{padding:6px 8px;vertical-align:top;border-top:1px solid var(--line)}.modal td:first-child{font-weight:600}
+.modal td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.modal input[type=text]{width:100%;height:38px;border:0;border-radius:10px;background:var(--panel);box-shadow:0 0 0 1px var(--line);padding:0 12px;font-size:14px;margin:4px 0 16px}
+.mh{display:flex;align-items:center;margin-bottom:8px}.mh h2{flex:1;margin:0}
+.toast{position:fixed;bottom:42px;left:50%;transform:translateX(-50%);z-index:95;background:var(--tip);color:var(--tipk);padding:10px 14px;border-radius:12px;font-size:13.5px;box-shadow:var(--shadow);display:flex;gap:12px;align-items:center;max-width:90vw}
+.toast button{color:var(--tipk);font-weight:700;text-decoration:underline}
+.menu{position:fixed;z-index:90;background:var(--panel);border-radius:12px;box-shadow:var(--shadow);padding:6px;min-width:220px}
+.menu button{display:flex;align-items:center;gap:10px;width:100%;height:34px;padding:0 10px;border-radius:8px;font-size:13.5px;text-align:left}
+.menu button:hover{background:var(--hover)}.menu button[aria-pressed=true]{color:var(--acc);font-weight:600}
+.menu hr{border:0;border-top:1px solid var(--line);margin:5px 4px}
+@media (max-width:1150px){.layout{--lw:220px;--rw:260px}.app{--lw:220px}.main{padding:18px 20px 24px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="bar" id="bar">
+    <div class="who">
+      <button class="btn icon ghost" data-act="menu" title="Open a guide, the sample, the guide format, keys" aria-label="Menu">__I_folder-open__</button>
+      <div class="txt"><div class="brand"><span class="logo">__I_reguide-mark__</span><b>Re<span>;</span><i>Guide</i></b><small class="beta" title="Re;Guide is in beta: it works, but expect rough edges">Beta</small></div><small id="who"></small></div>
+    </div>
+    <div class="timer" id="timer">
+      <div class="sclock"><b id="clock">0:00</b><small>Session</small></div>
+      <div class="track">
+        <div class="tt"><b id="nowTitle">Not started</b><span class="grow"></span><span class="left" id="left"></span>
+          <button class="btn sm icon ghost" id="pauseBtn" title="Pause" aria-label="Pause">__I_pause__</button></div>
+        <div class="meter" id="meter"><i></i></div>
+        <div class="td"><span id="pace"></span><span id="nowTime"></span></div>
+      </div>
+    </div>
+    <div class="end">
+      <button class="btn acc" id="nextBtn"><span>Start interview</span><kbd>N</kbd></button>
+      <button class="btn icon ghost" data-act="theme" title="Day or Night" aria-label="Day or Night">__I_sun-moon__</button>
+    </div>
+  </header>
+  <div class="layout">
+    <nav class="rail" id="rail" aria-label="Interview outline"></nav>
+    <div class="stage"><main class="main" id="main"></main><div class="cnav" id="cnav"></div></div>
+    <aside class="side" id="side"></aside>
+  </div>
+  <footer class="status"><span>← → Move between cues · N Next section · M Mark a moment · S Start or pause</span><span class="grow"></span><span class="save" id="saveStat"><i></i><span>No interview yet</span></span></footer>
+</div>
+<script>
+"use strict";
+const ICONS=__ICONS__;
+const I=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n]||''}</svg>`;
+/*__GUIDE_JS__*/
+const SAMPLE=/*__SAMPLE__*/null;
+const TAURI=window.__TAURI__,inv=(c,a)=>TAURI.core.invoke(c,a),pj=(...a)=>a.join('/');
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const plural=(n,w)=>`${n} ${w}${n===1?'':'s'}`;
+const mmss=ms=>{const t=Math.max(0,Math.floor(ms/1000)),h=Math.floor(t/3600),m=Math.floor(t%3600/60),x=String(t%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${x}`:`${m}:${x}`;};
+const dirOf=p=>p.replace(/[\\/][^\\/]*$/,''),baseName=p=>p.split(/[\\/]/).filter(Boolean).pop()||p;
+const LSG='reguide-guide',LSX='reguide-session',LSP='reguide-prefs';
+let P=Object.assign({theme:'auto',lshut:false,rshut:false,mode:'focus',zoom:100,ticks:true},(()=>{try{return JSON.parse(localStorage.getItem(LSP))||{}}catch{return {}}})());
+const savePrefs=()=>localStorage.setItem(LSP,JSON.stringify(P));
+let G=null,GP='',GT='',view=0,X=null,XP='',saveT=0,savedAt=null,warnOpen=true,CUES=[],localPos={};
+
+/* ---------- the session: one interview, saved as JSON next to the guide ----------
+   X = {guide, guidePath, name, started, ended, paused, pausedTotal (ms), live (section running),
+        secTime:{i:ms}, secEnter, enteredAt (session ms when live began), hist:[{from,enteredAt,had}],
+        cues:{i:pos}, cueAt:{"i.c": session ms first reached}, secNotes:{i:text}, marks:[{at,wall,sec,text}],
+        recStart (clock time recording began, or null), consent (clock time, or null)} */
+const now=()=>Date.now();
+const live=()=>X&&X.started&&!X.ended?X.live:null;
+const running=()=>live()!=null&&!X.paused;
+const elapsed=()=>!X||!X.started?0:((X.ended||X.paused||now())-X.started-X.pausedTotal);
+const secSpent=i=>!X?0:(X.secTime[i]||0)+(running()&&X.live===i?now()-X.secEnter:0);
+const planMs=i=>(G.sections[i].minutes||0)*60000;
+function flushSec(){if(running()){X.secTime[X.live]=(X.secTime[X.live]||0)+now()-X.secEnter;X.secEnter=now();}}
+function fix(x){return Object.assign({name:'',paused:null,pausedTotal:0,secTime:{},hist:[],cues:{},cueAt:{},secNotes:{},marks:[],recStart:null,consent:null,enteredAt:0},x,{live:x.live??x.cur??0});}
+const pos=i=>(X?X.cues:localPos)[i]||0;
+const setPos=(i,n)=>{(X?X.cues:localPos)[i]=n;};
+function save(){
+  if(!X||!X.started)return;
+  clearTimeout(saveT);saveT=setTimeout(async()=>{
+    if(!XP){const d=new Date(X.started),p=n=>String(n).padStart(2,'0'),nm=X.name?' '+X.name.replace(/[\\/:*?"<>|]+/g,' '):'';
+      XP=pj(dirOf(GP),`${G.title.replace(/[\\/:*?"<>|]+/g,' ')} sessions`,`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}${p(d.getMinutes())}${nm}.json`);}
+    X.lastSave=now();
+    try{await inv('write_text',{path:XP,text:JSON.stringify(X,null,1)});savedAt=new Date();if(!X.ended)localStorage.setItem(LSX,XP);else localStorage.removeItem(LSX);}
+    catch(e){savedAt=null;toast('Could not save the interview: '+e);}
+    status();
+  },400);
+}
+function status(){const el=$('#saveStat');el.classList.toggle('on',!!savedAt);
+  el.querySelector('span').textContent=!X||!X.started?'No interview yet':savedAt?`Saved ${savedAt.toTimeString().slice(0,5)}, next to the guide`:'Not saved yet';
+  el.title=XP?'Saved to '+XP:'Times and notes save next to the guide once you start';}
+
+function logCue(){if(!running())return;const k=`${X.live}.${pos(X.live)}`;if(X.cueAt[k]==null)X.cueAt[k]=elapsed();}
+function askStart(){
+  const m=modal(`<div class="mh"><h2>Start the interview</h2><button class="btn icon ghost" data-act="close" aria-label="Close">${I('x')}</button></div>
+    <label for="whoIn" style="font-size:13px;color:var(--mute)">Who is it with? Optional, and only used to name the saved file.</label>
+    <input type="text" id="whoIn" placeholder="For example P01" autocomplete="off">
+    <div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn ghost" data-act="close">Cancel</button><button class="btn acc" id="goBtn">${I('play','s')}Start the clock</button></div>`);
+  const go=()=>{const n=m.querySelector('#whoIn').value.trim();m.remove();start(n);};
+  m.querySelector('#goBtn').onclick=go;m.querySelector('#whoIn').onkeydown=e=>{if(e.key==='Enter')go();};
+  setTimeout(()=>m.querySelector('#whoIn').focus(),30);
+}
+function start(name){if(!G)return;X=fix({guide:G.title,guidePath:GP,name,started:now(),ended:null,live:0,secEnter:now(),cues:{...localPos}});XP='';view=0;logCue();save();render();}
+function pause(){if(!running())return;flushSec();X.paused=now();save();render();}
+function resume(){if(!X||!X.paused)return;X.pausedTotal+=now()-X.paused;X.paused=null;X.secEnter=now();save();render();}
+function end(){if(live()==null)return;if(!confirm('End the interview? The clock stops and everything is saved.'))return;if(X.paused)resume();flushSec();X.ended=now();save();render();summaryModal();}
+function goLive(to){ // move the running clock to section `to`
+  if(!running()||to===X.live||to<0||to>=G.sections.length)return;
+  flushSec();X.hist.push({from:X.live,enteredAt:X.enteredAt,had:X.secTime[to]||0});X.live=to;X.enteredAt=elapsed();view=to;logCue();save();render();$('#main').scrollTop=0;
+}
+function undoSection(){
+  if(!running()||!X.hist.length)return;
+  flushSec();const h=X.hist.pop(),moved=(X.secTime[X.live]||0)-h.had;
+  X.secTime[X.live]=h.had;X.secTime[h.from]=(X.secTime[h.from]||0)+moved;X.live=h.from;X.enteredAt=h.enteredAt;view=X.live;
+  save();render();toast('Back on '+G.sections[X.live].title+'. Its time came back with it.');
+}
+function next(){
+  if(!G)return;
+  if(live()==null)return askStart();
+  if(view!==X.live){view=X.live;render();return;}
+  if(X.paused)return;
+  if(X.live<G.sections.length-1)goLive(X.live+1);else end();
+}
+function viewSec(i){if(!G)return;view=Math.max(0,Math.min(G.sections.length-1,i));render();$('#main').scrollTop=0;}
+function moveCue(n){
+  if(!CUES.length)return;n=Math.max(0,Math.min(CUES.length-1,n));setPos(view,n);
+  if(X&&view===live())logCue();save();renderMain(true);renderCnav();
+  if(P.mode==='all')document.getElementById('cue-'+n)?.scrollIntoView({block:'start',behavior:'smooth'});
+}
+const recTime=m=>X.recStart&&m.wall>=X.recStart?`${mmss(m.wall-X.recStart)}`:`${mmss(m.at)}`;
+function openMark(){
+  if(live()==null){toast('Start the interview first. Bookmarks count from the start.');return;}
+  const at=elapsed(),wall=now(),sec=X.live;$$('.markbox').forEach(b=>b.remove());
+  const b=document.createElement('div');b.className='markbox';b.innerHTML=`<input type="text" placeholder="A few words for this moment (Enter saves, Esc cancels)" aria-label="Bookmark note"><button class="btn acc sm">Save</button>`;
+  document.body.append(b);const inp=b.querySelector('input');inp.focus();
+  const ok=()=>{X.marks.push({at,wall,sec,text:inp.value.trim()});b.remove();save();renderSide();toast(`Bookmarked at ${recTime(X.marks.at(-1))}`);};
+  b.querySelector('button').onclick=ok;inp.onkeydown=e=>{if(e.key==='Enter')ok();else if(e.key==='Escape')b.remove();};
+}
+function toggleTick(k){if(live()==null)return;
+  if(X[k]&&!confirm(k==='recStart'?'Clear the recording start? Bookmarks will show session time instead.':'Clear the consent tick?'))return;
+  X[k]=X[k]?null:now();save();renderSide();
+  if(k==='recStart'&&X.recStart)toast('Recording start noted. Bookmarks now show recording time.');}
+
+/* ---------- opening a guide ---------- */
+async function loadGuide(path,quiet){
+  try{GT=await inv('read_text',{path});}catch(e){localStorage.removeItem(LSG);if(!quiet)toast('Could not open the guide: '+e);return false;}
+  GP=path;G=GX.read(GT,baseName(path));localStorage.setItem(LSG,path);view=Math.min(view,G.sections.length-1);warnOpen=true;return true;
+}
+async function openGuide(){
+  const f=await TAURI.dialog.open({title:'Open an interview guide',filters:[{name:'Guide',extensions:['md','markdown','txt']}]});if(!f)return;
+  if(live()!=null&&!confirm('An interview is running. Open another guide anyway? It stays saved.'))return;
+  X=null;XP='';localPos={};localStorage.removeItem(LSX);view=0;if(await loadGuide(f))render();
+}
+async function openSample(){
+  const dir=pj(await TAURI.path.appDataDir(),'Sample guide'),f=pj(dir,SAMPLE.name);
+  if(!await inv('exists',{path:f}))await inv('write_text',{path:f,text:SAMPLE.text});
+  X=null;XP='';localPos={};view=0;if(await loadGuide(f))render();
+}
+const csvCell=v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+async function exportCSV(){
+  if(!X||!X.started)return;
+  const rows=[['Section','Kind','Text','Time','Notes']];
+  rows.push(['','Interview',X.name||'',new Date(X.started).toLocaleString(),`${mmss(elapsed())} in all${X.recStart?`; recording started at ${mmss(X.recStart-X.started)} clock time from start`:''}${X.consent?'; consent ticked':''}`]);
+  G.sections.forEach((s,i)=>{
+    rows.push([s.title,'Section',`${mmss(secSpent(i))} spent${s.minutes?` of ${s.minutes} min planned`:''}`,'',X.secNotes[i]||'']);
+    GX.cues(s).forEach((c,j)=>{if(c.main?.k==='ask'){const t=X.cueAt[`${i}.${j}`];rows.push([s.title,'Question '+c.main.n,c.main.text,t!=null?mmss(t):'not reached','']);}});
+    X.marks.filter(m=>m.sec===i).forEach(m=>rows.push([s.title,'Bookmark',m.text,recTime(m)+(X.recStart&&m.wall>=X.recStart?' recording':' session'),'']));
+  });
+  const f=await TAURI.dialog.save({defaultPath:(XP?baseName(XP).replace(/\.json$/,''):'interview')+'.csv',filters:[{name:'CSV',extensions:['csv']}]});if(!f)return;
+  try{await inv('write_text',{path:f,text:'﻿'+rows.map(r=>r.map(csvCell).join(',')).join('\n')});toast('Saved '+baseName(f));}catch(e){toast('Could not save: '+e);}
+}
+
+/* ---------- drawing ---------- */
+function render(){
+  if(P.theme==='auto')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=P.theme;
+  $('#app').classList.toggle('lshut',!!P.lshut);$('#app').classList.toggle('rshut',!!P.rshut);
+  document.title=G?G.title+' · Re;Guide':'Re;Guide';
+  $('#who').innerHTML=G?(X&&X.name?`<b>${esc(X.name)}</b> · `:'')+esc(G.title):'No guide open';
+  CUES=G?GX.cues(G.sections[view]):[];
+  renderRail();renderMain();renderCnav();renderSide();tick();status();
+}
+const opener=(side,label)=>`<div class="opener"><button class="btn sm icon ghost" data-act="${side}" aria-label="Open ${label}">${I(side==='lshut'?'chevron-right':'chevron-left','s')}</button><b>${label}</b></div>`;
+const head=(title,side)=>`<div class="ph"><h3>${title}</h3><button class="btn sm icon ghost" data-act="${side}" aria-label="Fold ${title}">${I(side==='lshut'?'chevron-left':'chevron-right','s')}</button></div>`;
+const tone=i=>i%6;
+function railText(i){const s=G.sections[i],sp=secSpent(i);return `<span data-rail="${i}" class="${s.minutes&&sp>planMs(i)?'over':''}">${sp?mmss(sp):'–'}</span>${s.minutes?` / ${s.minutes}`:''}`;}
+function renderRail(){
+  const L=live();
+  $('#rail').innerHTML=opener('lshut','Outline')+head('Interview outline','lshut')+(G?G.sections.map((s,i)=>{
+    const done=X&&X.started&&secSpent(i)>0&&i!==L;
+    return `<button class="ri${i===view?' viewing':''}${done?' done':''}" data-view="${i}" data-tone="${tone(i)}" aria-current="${i===view}">
+      <span class="rt">${esc(s.title)}</span><span class="rp">${railText(i)}</span><span class="rs">Section ${i+1}</span>
+      <span class="rb">${i===view&&L!=null&&i!==L?'<b class="vw">Viewing</b>':''}${i===L?(X.paused?'<b class="pz">Paused</b>':'<b class="lv">● Live</b>'):''}</span></button>`;}).join('')
+    :'<p style="color:var(--faint);font-size:13px;margin:4px 8px">Open a guide to see its sections.</p>');
+}
+function cueHTML(c,j){
+  const k=c.main?.k||'note',i=view,at=X?.cueAt[`${i}.${j}`];
+  const note=n=>`<p class="pnote" title="Only you see this">${I('eye-off','s')}<span>${esc(n.text)}</span></p>`;
+  const label=k==='ask'?`Question ${c.main.n}`:k==='say'?'Read aloud':k==='probe'?'Probe':'Note';
+  return `<section class="cue ${k}${j===pos(i)?' on':''}" id="cue-${j}" data-cue="${j}"${P.mode==='focus'&&j!==pos(i)?' hidden':''}>
+    <div class="cl"><b>${label}</b>${at!=null?`<span class="at">${I('check','s')}Reached at ${mmss(at)}</span>`:''}<span class="grow"></span><span>Cue ${j+1} of ${CUES.length}</span></div>
+    ${c.before.map(note).join('')}
+    ${c.main?`<p class="spoken">${esc(c.main.text)}</p>`:''}
+    ${c.main?.probes?.length?`<ul class="probes">${c.main.probes.map(p=>`<li>${esc(p.text)}</li>`).join('')}</ul>`:''}
+    ${c.after.map(x=>x.k==='probe'?`<ul class="probes"><li>${esc(x.text)}</li></ul>`:note(x)).join('')}
+  </section>`;
+}
+const cueName=c=>{const t=(c.main||c.before[0]).text.split('\n')[0];return t.length>60?t.slice(0,57)+'…':t;};
+function renderMain(keep){
+  const b=$('#main'),y=b.scrollTop;b.style.setProperty('--z',P.zoom/100);
+  if(!G){b.innerHTML=`<div class="empty"><div class="logo">${I('reguide-mark')}</div><h2>Open an interview guide</h2>
+    <ol><li>A guide is a plain text file. Lines start with <b>Say:</b>, <b>Ask:</b>, <b>Probe:</b> or <b>Note:</b>, and <b>## Section</b> starts a section.</li><li>Start the interview and Re;Guide keeps each section's clock, one cue at a time.</li><li>Times, notes and bookmarks save next to the guide, on this computer only.</li></ol>
+    <div class="row"><button class="btn acc" data-act="open">${I('folder-open','s')}Open guide</button><button class="btn" data-act="sample">${I('book-open-text','s')}Try the sample</button><button class="btn ghost" data-act="help">${I('file-text','s')}How to write one</button></div></div>`;return;}
+  const s=G.sections[view],L=live(),preview=L!=null&&view!==L,p=pos(view);
+  b.innerHTML=`<div class="col${P.mode==='all'?' full':''}" data-tone="${tone(view)}">
+    ${G.warnings.length?`<details class="warns"${warnOpen?' open':''}><summary>${plural(G.warnings.length,'thing')} to check in this guide</summary><ul>${G.warnings.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></details>`:''}
+    ${preview?`<div class="banner warnb">${I('eye-off')}<span class="grow">Previewing this section. The clock is still on ${esc(G.sections[L].title)}.</span><button class="btn sm" data-act="back">Return to live</button></div>`
+      :X&&X.ended?`<div class="banner">${I('check')}<span class="grow">Interview ended, ${mmss(elapsed())} in all. Saved next to the guide.</span><button class="btn sm" data-act="summary">${I('chart-column','s')}Summary</button><button class="btn sm" data-act="export">${I('download','s')}Export CSV</button></div>`
+      :!X||!X.started?`<div class="banner">${I('timer')}<span class="grow">Read through freely. Start when the interview begins, and the clock runs from then.</span></div>`:''}
+    <div class="sh"><div><h2>${esc(s.title)}</h2><small>Section ${view+1}${s.minutes?` · ${s.minutes} minutes planned`:''}</small></div><span class="grow"></span>
+      <span class="zoom"><button class="btn sm icon" data-act="zoom" data-v="-10" aria-label="Smaller text">${I('minus','s')}</button><span>${P.zoom}%</span><button class="btn sm icon" data-act="zoom" data-v="10" aria-label="Bigger text">${I('plus','s')}</button></span>
+      ${preview&&running()?`<button class="btn sm acc" data-act="here">Start this section now</button>`:''}</div>
+    <div class="tools"><div class="seg" aria-label="Script view"><button data-act="mode" data-v="focus" aria-pressed="${P.mode==='focus'}">Focus</button><button data-act="mode" data-v="all" aria-pressed="${P.mode==='all'}">Full script</button></div></div>
+    ${CUES.map(cueHTML).join('')||'<p class="pnote">This section is empty.</p>'}
+    ${CUES.length>1?`<div class="jumps" aria-label="Jump to a cue">${CUES.map((c,j)=>`<button data-cue="${j}" aria-current="${j===p}" class="${X?.cueAt[`${view}.${j}`]!=null?'seen':''}"><span class="jk">${c.main?.k==='ask'?'Q'+c.main.n:c.main?.k==='say'?'Read aloud':'Note'}</span><span class="jn">${esc(cueName(c))}</span></button>`).join('')}</div>`:''}
+    ${P.mode==='focus'&&p<CUES.length-1?`<details class="upnext"><summary>Up next · ${esc(cueName(CUES[p+1]))}</summary><p>${esc(CUES[p+1].main?.text||'')}</p></details>`:''}
+  </div>`;
+  if(keep)b.scrollTop=y;
+}
+function renderCnav(){
+  const el=$('#cnav');el.hidden=!G||!CUES.length;if(el.hidden)return;const p=pos(view);
+  const last=p>=CUES.length-1,canNext=last&&running()&&view===X.live; // at the last cue the button moves the interview on, as N does
+  el.innerHTML=`<button class="btn" data-act="prev" ${p?'':'disabled'}>${I('arrow-left','s')}Previous cue</button><span class="pos">${p+1} / ${CUES.length}</span>
+    <button class="btn ${!last||canNext?'acc':''}" data-act="${last?'nextsec':'nextcue'}" ${!last||canNext?'':'disabled'}>${!last?'Next cue':canNext?(X.live<G.sections.length-1?'Next section':'End interview'):'End of this section'}${I('arrow-right','s')}</button>`;
+}
+function renderSide(){
+  const st=X&&X.started,L=live(),el=$('#side'),y=el.scrollTop;
+  if(!G){el.innerHTML=opener('rshut','Notes')+head('Session notes','rshut');return;}
+  const marks=st?X.marks.filter(m=>m.sec===view):[];
+  el.innerHTML=opener('rshut','Notes')+head('Session notes','rshut')+
+    (P.ticks?`<div class="ticks"><button class="${st&&X.recStart?'on':''}" data-act="rec" ${L!=null?'':'disabled'} title="Optional. Note when your recorder started, so bookmarks show recording time.">${I(st&&X.recStart?'check':'circle-dot','s')}Recording${st&&X.recStart?` at ${mmss(X.recStart-X.started)}`:''}</button><button class="${st&&X.consent?'on':''}" data-act="consent" ${L!=null?'':'disabled'} title="Optional. Tick once consent is given.">${I('check','s')}Consent</button></div>`:'')+
+    `<div class="field"><div class="lb">${I('notebook-pen','s')}Notes on ${esc(G.sections[view].title)}</div><textarea data-secnote="${view}" ${st?'':'disabled'} placeholder="${st?'Anything the audio will not carry':'Start the interview to take notes'}">${esc(st?X.secNotes[view]||'':'')}</textarea></div>
+    <div class="field"><div class="lb">${I('bookmark','s')}Bookmarks<span class="grow"></span><button class="btn sm" data-act="mark" ${L!=null?'':'disabled'}>Mark <kbd>M</kbd></button></div>
+      <ul class="marks">${marks.map(m=>`<li><time>${recTime(m)}</time><span>${esc(m.text)||'<small>No note</small>'}</span></li>`).join('')||'<li><small>A bookmark saves the time of a quote or moment, to find it in the recording later.</small></li>'}</ul></div>
+    <div class="acts"><button class="btn sm" data-act="export" ${st?'':'disabled'}>${I('download','s')}Export</button><button class="btn sm" data-act="summary" ${st?'':'disabled'}>${I('chart-column','s')}Summary</button>
+      <button class="btn sm" data-act="undo" ${running()&&X.hist.length?'':'disabled'} title="Go back to the section before, and give its time back">${I('undo-2','s')}Undo section</button>${L!=null?`<button class="btn sm endb" data-act="end">${I('square','s')}End interview</button>`:''}</div>`;
+  el.scrollTop=y;
+}
+function tick(){ // computed from timestamps, so a hidden window never drifts
+  const bar=$('#bar'),nb=$('#nextBtn'),pb=$('#pauseBtn'),L=live();
+  bar.classList.toggle('idle',L==null);$('#timer').style.visibility=G?'':'hidden';
+  $('#clock').textContent=mmss(elapsed());
+  pb.hidden=L==null;pb.innerHTML=I(X?.paused?'play':'pause');pb.title=X?.paused?'Resume':'Pause';pb.setAttribute('aria-label',pb.title);
+  const nl=nb.querySelector('span'),meter=$('#meter');
+  nb.hidden=!G;nb.disabled=false;nb.className='btn acc';
+  if(!G)return;
+  if(L==null){
+    nl.textContent=X&&X.ended?'New interview':'Start interview';
+    $('#nowTitle').textContent=X&&X.ended?'Interview ended':'Not started';$('#left').textContent='';$('#nowTime').textContent=G.planned?`${G.planned} minutes planned`:'';
+    $('#pace').textContent=X&&X.ended?`${mmss(elapsed())} in all`:'Press Start or N when the interview begins.';meter.firstChild.style.width=X&&X.ended?'100%':'0';meter.classList.remove('over');
+  }else{
+    const s=G.sections[L],sp=secSpent(L),pl=planMs(L);
+    $('#nowTitle').textContent=(X.paused?'Paused · ':'')+s.title;
+    $('#left').textContent=pl?(sp>pl?`${mmss(sp-pl)} over`:`${mmss(pl-sp)} left`):mmss(sp);$('#left').classList.toggle('over',!!pl&&sp>pl);
+    $('#nowTime').textContent=pl?`${mmss(sp)} spent / ${s.minutes}:00 planned`:`${mmss(sp)} in this section`;
+    meter.firstChild.style.width=pl?Math.min(100,sp/pl*100)+'%':'0';meter.classList.toggle('over',!!pl&&sp>pl);
+    const before=G.sections.slice(0,L).reduce((a,x)=>a+(x.minutes||0),0)*60000,p=X.enteredAt-before+Math.max(0,sp-pl);
+    $('#pace').innerHTML=X.paused?'Break not counted. Bookmarks keep recording time.':!G.planned?'':Math.abs(p)<30000?'On plan':p>0?`<span class="behind">${mmss(p)} behind plan</span>`:`<span class="ahead">${mmss(-p)} ahead of plan</span>`;
+    if(view!==L){nl.textContent='Return to live';nb.className='btn';}
+    else if(L===G.sections.length-1)nl.textContent='End interview';
+    else nl.textContent='Next section';
+    nb.disabled=!!X.paused&&view===L;
+  }
+  $$('[data-rail]').forEach(e=>{const i=+e.dataset.rail,sp=secSpent(i),t=sp?mmss(sp):'–';if(e.textContent!==t)e.textContent=t;e.classList.toggle('over',!!(G.sections[i].minutes&&sp>planMs(i)));});
+}
+setInterval(tick,1000);
+
+/* ---------- small pieces ---------- */
+function toast(msg,action){$$('.toast').forEach(t=>t.remove());const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=msg;if(action){const b=document.createElement('button');b.textContent=action[0];b.onclick=()=>{t.remove();action[1]();};t.append(b);}document.body.append(t);setTimeout(()=>t.remove(),action?6000:3200);}
+function modal(html){$$('.modal').forEach(m=>m.remove());const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="box">${html}</div>`;m.onclick=e=>{if(e.target===m||e.target.closest('[data-act=close]'))m.remove();};document.body.append(m);return m;}
+function menu(anchor,items){$$('.menu').forEach(m=>m.remove());const m=document.createElement('div');m.className='menu';
+  items.forEach(it=>{if(!it){m.append(document.createElement('hr'));return;}const [label,on,fn]=it,b=document.createElement('button');b.innerHTML=label;b.setAttribute('aria-pressed',!!on);b.onclick=()=>{m.remove();fn();};m.append(b);});
+  document.body.append(m);const r=anchor.getBoundingClientRect();m.style.top=r.bottom+6+'px';m.style.left=Math.max(8,Math.min(r.left,innerWidth-m.offsetWidth-8))+'px';
+  setTimeout(()=>document.addEventListener('click',()=>m.remove(),{once:true}));}
+function summaryModal(){
+  if(!X||!X.started)return;
+  const rows=G.sections.map((s,i)=>{const cs=GX.cues(s),qs=cs.filter(c=>c.main?.k==='ask'),hit=cs.filter((c,j)=>c.main?.k==='ask'&&X.cueAt[`${i}.${j}`]!=null).length,sp=secSpent(i);
+    return `<tr><td>${esc(s.title)}</td><td class="n" style="${s.minutes&&sp>planMs(i)?'color:var(--amb)':''}">${sp?mmss(sp):'–'}${s.minutes?` / ${s.minutes}:00`:''}</td><td class="n">${qs.length?`${hit} of ${plural(qs.length,'question')}`:''}</td><td class="n">${X.marks.filter(m=>m.sec===i).length||''}</td></tr>`;}).join('');
+  modal(`<div class="mh"><h2>Summary${X.name?' · '+esc(X.name):''}</h2><button class="btn icon ghost" data-act="close" aria-label="Close">${I('x')}</button></div>
+    <p style="margin:0 0 12px;color:var(--mute)">${mmss(elapsed())} in all${G.planned?` against ${G.planned} minutes planned`:''}. Breaks are not counted.${X.recStart?' Bookmarks show recording time.':''}</p>
+    <table><tr><td></td><td class="n" style="color:var(--mute);font-weight:600">Time</td><td class="n" style="color:var(--mute);font-weight:600">Reached</td><td class="n" style="color:var(--mute);font-weight:600">Bookmarks</td></tr>${rows}</table>
+    <div style="display:flex;justify-content:flex-end;margin-top:16px"><button class="btn acc" data-act="export">${I('download','s')}Export CSV</button></div>`);
+}
+function helpModal(){modal(`<div class="mh"><h2>How to write a guide</h2><button class="btn icon ghost" data-act="close" aria-label="Close">${I('x')}</button></div>
+  <p style="margin:0 0 10px;color:var(--mute)">A guide is a plain text file (.md or .txt). Write it in any editor, then open it here. Re;Guide reads it again when you come back to the window, so edits show up.</p>
+  <pre># Freelancer study guide
+## Warm-up (5 min)
+Say: Thanks for joining. This takes about an hour.
+Ask: How did you start freelancing?
+Probe: What made you choose it?
+Note: Skip if they already said it.</pre>
+  <table><tr><td># Title</td><td>The guide's name. Optional: the file name is used if missing.</td></tr>
+  <tr><td>## Section (5 min)</td><td>Starts a section. Minutes are optional and turn on its clock. "5 min", "5 minutes" and "5m" all work.</td></tr>
+  <tr><td>Say:</td><td>Read aloud, like a welcome or consent line. One cue.</td></tr>
+  <tr><td>Ask:</td><td>A question, numbered through the guide. One cue; the time you reach it is logged.</td></tr>
+  <tr><td>Probe:</td><td>A follow-up. It sits with the Ask above it.</td></tr>
+  <tr><td>Note:</td><td>Private, for you only. It sits with the cue above it.</td></tr>
+  <tr><td>Other lines</td><td>A line with no word in front joins the line above. Capitals don't matter, and a leading "-" or "1." is ignored.</td></tr></table>
+  <p style="margin:12px 0 0;color:var(--mute)">Anything odd, like a Probe with no Ask or an empty section, is listed at the top of the guide. No line is ever dropped.</p>`);}
+function keysModal(){modal(`<div class="mh"><h2>Keys</h2><button class="btn icon ghost" data-act="close" aria-label="Close">${I('x')}</button></div>
+  <table>${[['← →','Previous or next cue'],['N','Next section (or Start, or Return to live)'],['M','Bookmark this moment'],['S','Start, pause or resume'],['F','Focus or full script'],['?','This list']].map(([k,d])=>`<tr><td>${k.split(' ').map(x=>`<kbd>${x}</kbd>`).join(' ')}</td><td>${d}</td></tr>`).join('')}</table>`);}
+function mainMenu(btn){menu(btn,[[`${I('folder-open','s')}Open guide`,false,openGuide],[`${I('book-open-text','s')}Try the sample`,false,openSample],null,
+  [`${I('file-text','s')}How to write a guide`,false,helpModal],[`${I('keyboard','s')}Keys`,false,keysModal],null,
+  [`${I(P.ticks?'check':'circle-dot','s')}Show recording and consent ticks`,P.ticks,()=>{P.ticks=!P.ticks;savePrefs();renderSide();}]]);}
+
+/* ---------- events ---------- */
+$('#nextBtn').onclick=next;
+$('#pauseBtn').onclick=()=>X?.paused?resume():pause();
+const startPause=()=>live()==null?askStart():X.paused?resume():pause();
+document.addEventListener('click',e=>{
+  const v=e.target.closest('[data-view]');if(v){viewSec(+v.dataset.view);return;}
+  const c=e.target.closest('button[data-cue]');if(c){moveCue(+c.dataset.cue);return;}
+  const w=e.target.closest('details.warns summary');if(w){warnOpen=!w.parentElement.open;return;}
+  const el=e.target.closest('[data-act]');if(!el||el.disabled)return;const a=el.dataset.act;
+  const acts={open:openGuide,sample:openSample,help:helpModal,keys:keysModal,export:exportCSV,summary:summaryModal,end,undo:undoSection,mark:openMark,
+    back:()=>viewSec(X.live),here:()=>goLive(view),prev:()=>moveCue(pos(view)-1),nextsec:next,nextcue:()=>moveCue(pos(view)+1),
+    rec:()=>toggleTick('recStart'),consent:()=>toggleTick('consent'),menu:()=>mainMenu(el),
+    lshut:()=>{P.lshut=!P.lshut;savePrefs();render();},rshut:()=>{P.rshut=!P.rshut;savePrefs();render();},
+    mode:()=>{P.mode=el.dataset.v;savePrefs();renderMain();if(P.mode==='all')document.getElementById('cue-'+pos(view))?.scrollIntoView({block:'start'});},
+    zoom:()=>{P.zoom=Math.max(70,Math.min(160,P.zoom+ +el.dataset.v));savePrefs();renderMain(true);},
+    theme:()=>menu(el,[[`${I('monitor','s')}Follow the computer`,P.theme==='auto',()=>{P.theme='auto';savePrefs();render();}],[`${I('sun','s')}Day`,P.theme==='light',()=>{P.theme='light';savePrefs();render();}],[`${I('moon','s')}Night`,P.theme==='dark',()=>{P.theme='dark';savePrefs();render();}]])};
+  acts[a]?.();
+});
+document.addEventListener('input',e=>{const t=e.target.closest('[data-secnote]');if(!t||!X)return;X.secNotes[t.dataset.secnote]=t.value;save();});
+document.addEventListener('keydown',e=>{
+  if(/INPUT|TEXTAREA/.test(document.activeElement?.tagName)||e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.key==='Escape'){$$('.modal,.menu,.markbox').forEach(m=>m.remove());return;}
+  if(!G||$('.modal'))return;
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'){e.preventDefault();moveCue(pos(view)+1);}else if(e.key==='ArrowLeft'){e.preventDefault();moveCue(pos(view)-1);}
+  else if(k==='n')next();else if(k==='m'){e.preventDefault();openMark();}else if(k==='s')startPause();
+  else if(k==='f'){P.mode=P.mode==='all'?'focus':'all';savePrefs();renderMain();}else if(e.key==='?')keysModal();
+});
+addEventListener('focus',async()=>{ // the guide was edited in another program: read it again
+  if(!GP)return;let t;try{t=await inv('read_text',{path:GP});}catch{return;}
+  if(t!==GT){GT=t;G=GX.read(t,baseName(GP));view=Math.min(view,G.sections.length-1);if(X)X.live=Math.min(X.live,G.sections.length-1);render();toast('Guide updated from the file.');}
+});
+
+/* ---------- boot: reopen the last guide, and an unfinished interview if there was one ---------- */
+(async()=>{
+  const g=localStorage.getItem(LSG);
+  if(g&&await loadGuide(g,true)){
+    const xp=localStorage.getItem(LSX);
+    if(xp){try{X=fix(JSON.parse(await inv('read_text',{path:xp})));XP=xp;view=Math.min(X.live,G.sections.length-1);if(X.lastSave)savedAt=new Date(X.lastSave);
+      if(!X.ended&&!X.paused){X.secTime[X.live]=(X.secTime[X.live]||0)+Math.max(0,(X.lastSave||X.secEnter)-X.secEnter);X.paused=X.lastSave||now();} // the gap while the app was closed is not interview time
+      toast('Your last interview is back, paused.');}catch{localStorage.removeItem(LSX);}}
+  }
+  render();
+})();
+</script>
+</body>
+</html>
